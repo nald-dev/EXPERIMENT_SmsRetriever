@@ -133,7 +133,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.starter.app"
+        applicationId "com.sms.retriever"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
