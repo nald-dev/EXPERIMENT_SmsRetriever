@@ -1,18 +1,20 @@
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native'
 
-import { StackNavigationProp } from '@react-navigation/stack'
+import SmsRetriever from 'react-native-sms-retriever'
 
 import { Sentence } from '../references/constants/sentence'
-import { StackNavigatorParameters } from '../references/types/navigators'
 
-type PropsType = {
-  navigation: StackNavigationProp<StackNavigatorParameters, 'Home'>
-}
+function Home() {
+  const [appHash, setAppHash] = useState<string | undefined>()
+  const [lastCode, setLastCode] = useState<string | undefined>()
+  const [isListeningMessage, setIsListeningMessage] = useState(false)
 
-function Home(props: PropsType) {
-  const { navigation } = props
+  useEffect(() => {
+    SmsRetriever.getAppSignature()
+    .then(appHash => setAppHash(appHash))
+  }, [])
 
   return (
     <SafeAreaView
@@ -27,11 +29,30 @@ function Home(props: PropsType) {
           justifyContent: 'center'
         }}
       >
+        <Text
+          style = {{
+            fontSize: 24,
+            fontWeight: 'bold'
+          }}
+        >
+          App Hash: {appHash || '-'}
+        </Text>
+
+        <Text
+          style = {{
+            fontSize: 24,
+            fontWeight: 'bold'
+          }}
+        >
+          Last Code: {lastCode || '-'}
+        </Text>
+
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress = {() => navigation.navigate('PickImage')}
+          disabled = {isListeningMessage}
+          onPress = {_onSmsListenerPressed}
           style={{
-            backgroundColor: 'dodgerblue',
+            backgroundColor: isListeningMessage ? 'gray' : 'dodgerblue',
             borderRadius: 8,
             elevation: 4,
             marginHorizontal: 20,
@@ -54,7 +75,7 @@ function Home(props: PropsType) {
               fontWeight: '500'
             }}
           >
-            Go To Pick Image Screen
+            {isListeningMessage ? 'Listening For A Message...' : 'Start SMS Listener'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -70,6 +91,28 @@ function Home(props: PropsType) {
       </Text>
     </SafeAreaView>
   )
+
+  async function _onSmsListenerPressed() {
+    setLastCode(undefined)
+
+    try {
+      const registered = await SmsRetriever.startSmsRetriever()
+      
+      if (registered) {
+        setIsListeningMessage(true)
+
+        SmsRetriever.addSmsListener(event => {
+          setLastCode(event.message?.split('/')[0].split(' ')[event.message?.split('/')[0].split(' ').length - 1])
+
+          SmsRetriever.removeSmsListener()
+
+          setIsListeningMessage(false)
+        }) 
+      }
+    } catch (error) {
+      console.log(JSON.stringify(error))
+    }
+  }
 }
 
 export default Home

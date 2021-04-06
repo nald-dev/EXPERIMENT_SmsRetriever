@@ -28,6 +28,7 @@
     "react-native-reanimated": "1.13.2",
     "react-native-safe-area-context": "3.2.0",
     "react-native-screens": "2.18.1",
+    "react-native-sms-retriever": "https://github.com/sarmad1995/react-native-sms-retriever.git",
     "react-native-snackbar": "2.4.0",
     "react-native-toast-message": "1.4.9",
     "react-native-webview": "11.3.2"
